@@ -10,16 +10,28 @@
     <div id="output"></div>
 
     <script>
-        // === SETTINGS ===
+    // === SETTINGS ===
 
-        // === HELPER ===
+    // === HELPER ===
 
-        // === CORE LOGIC ===
+    // === CORE LOGIC ===
 
-        // === TRIGGER ===
+    // === TRIGGER ===
     
-        // === RENDER TO PAGE ===
+    // === RENDER TO PAGE ===
+        //null must be replaced with the function call.
+        const result = null; 
+        const output = document.getElementById("output");
 
+        if(Array.isArray(result)) {
+            result.forEach(item => {
+        //used JSON.stringify() to convert any object, array, or value to a readable string.
+                output.innerHTML += `<p>${JSON.stringify(item)}</p>`; 
+            });
+        } else {
+            output.innerHTML = `<p>${JSON.stringify(result)}</p>` 
+        }
+                
     </script>
 
 </body>
