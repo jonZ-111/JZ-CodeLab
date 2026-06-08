@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jonathan's Python Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #16161d;
+    --surface2: #1e1e28;
+    --border: #2a2a38;
+    --accent: #7c6af7;
+    --accent2: #f7a26a;
+    --green: #4ade80;
+    --red: #f87171;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --js: #f7df1e;
+    --py: #4c8eff;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .logo { font-size: 16px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .logo span { color: var(--accent2); }
+
+  .status { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .status.ready { color: var(--green); }
+  .status.loading { color: var(--accent2); }
+
+  .exercises {
+    display: flex;
+    gap: 6px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .ex-btn {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .ex-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .ex-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr auto;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid var(--border);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .py-label { color: var(--py); }
+  .out-label { color: var(--green); }
+  .js-label { color: var(--js); }
+
+  .run-btn {
+    padding: 5px 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .run-btn:hover { background: #6a58e0; transform: scale(1.02); }
+  .run-btn:active { transform: scale(0.98); }
+  .run-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  textarea {
+    flex: 1;
+    background: var(--surface);
+    color: var(--text);
+    border: none;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    resize: none;
+    outline: none;
+    tab-size: 4;
+  }
+
+  textarea::selection { background: rgba(124, 106, 247, 0.3); }
+
+  .output {
+    flex: 1;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-y: auto;
+    background: var(--surface);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .output .success { color: var(--green); }
+  .output .error { color: var(--red); }
+  .output .info { color: var(--muted); }
+  .output .result { color: var(--text); }
+
+  .js-panel {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--border);
+    border-right: none;
+    max-height: 200px;
+  }
+
+  .js-panel textarea {
+    background: #13130a;
+    color: #f7df1e;
+    max-height: 160px;
+  }
+
+  .clear-btn {
+    padding: 4px 10px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .clear-btn:hover { color: var(--red); border-color: var(--red); }
+
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    padding: 6px 16px;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Jonathan's <span>Python</span> Lab</div>
+  <div class="status loading" id="status">⟳ Loading Python engine...</div>
+</header>
+
+<div class="exercises">
+  <button class="ex-btn active" onclick="loadEx(0)">01 — Flag Transactions</button>
+  <button class="ex-btn" onclick="loadEx(1)">02 — Totals Per User</button>
+  <button class="ex-btn" onclick="loadEx(2)">03 — Process Orders</button>
+  <button class="ex-btn" onclick="loadEx(3)">04 — Debug Code</button>
+  <button class="ex-btn" onclick="loadEx(4)">05 — Sandbox</button>
+</div>
+
+<div class="main">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-label py-label">🐍 Python Editor</span>
+      <button class="run-btn" id="runBtn" onclick="runCode()" disabled>▶ Run</button>
+    </div>
+    <textarea id="pyEditor" spellcheck="false" placeholder="Write your Python here..."></textarea>
+    <div class="hint">Tab = 4 spaces &nbsp;|&nbsp; Click ▶ Run to execute</div>
+  </div>
+
+  <div class="panel" style="border-right:none;">
+    <div class="panel-header">
+      <span class="panel-label out-label">⚡ Output</span>
+      <button class="clear-btn" onclick="clearOutput()">Clear</button>
+    </div>
+    <div class="output" id="output"><span class="info">Output will appear here when you run your code...</span></div>
+  </div>
+
+  <div class="panel js-panel">
+    <div class="panel-header">
+      <span class="panel-label js-label">JS Equivalent</span>
+    </div>
+    <textarea id="jsEditor" spellcheck="false" readonly></textarea>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+<script>
+let pyodide = null;
+
+const exercises = [
+  {
+    title: "Flag Suspicious Transactions",
+    py: `# === SETTINGS ===
+transactions = [
+    {"user": "Jon",  "amount": 500},
+    {"user": "Jon",  "amount": 3500},
+    {"user": "Jon",  "amount": 200},
+    {"user": "Jon",  "amount": 100},
+    {"user": "Ana",  "amount": 5000},
+    {"user": "Luis", "amount": 800},
+]
+
+# === HELPER ===
+def times_repeated(user, transactions):
+    count = 0
+    for tra in transactions:
+        if tra["user"] == user:
+            count += 1
+    return count
+
+# === MAIN FUNCTION ===
+def is_flagged(transactions):
+    flagged = []
+    for tra in transactions:
+        high_amount = tra["amount"] > 3000
+        too_many    = times_repeated(tra["user"], transactions) > 3
+        if high_amount or too_many:
+            flagged.append(tra)
+    return flagged
+
+# === TRIGGER ===
+result = is_flagged(transactions)
+print("Flagged transactions:")
+for t in result:
+    print(f"  User: {t['user']} | Amount: ${t['amount']}")`,
+    js: `// === SETTINGS ===
+const transactions = [
+  { user: "Jon",  amount: 500  },
+  { user: "Jon",  amount: 3500 },
+  { user: "Jon",  amount: 200  },
+  { user: "Jon",  amount: 100  },
+  { user: "Ana",  amount: 5000 },
+  { user: "Luis", amount: 800  },
+];
+
+// === HELPER ===
+const timesRepeated = (user, transactions) =>
+  transactions.filter(t => t.user === user).length;
+
+// === MAIN FUNCTION ===
+function isFlagged(transactions) {
+  return transactions.filter(tra =>
+    tra.amount > 3000 ||
+    timesRepeated(tra.user, transactions) > 3
+  );
+}
+
+// === TRIGGER ===
+const result = isFlagged(transactions);
+console.log("Flagged:", result);`
+  },
+  {
+    title: "Calculate Totals Per User",
+    py: `# === SETTINGS ===
+payments = [
+    {"user": "Jon",  "amount": 200},
+    {"user": "Ana",  "amount": 150},
+    {"user": "Jon",  "amount": 300},
+    {"user": "Luis", "amount": 500},
+    {"user": "Ana",  "amount": 250},
+    {"user": "Jon",  "amount": 100},
+]
+
+# === MAIN FUNCTION ===
+def totals_per_user(payments):
+    totals = {}
+    for payment in payments:
+        user   = payment["user"]
+        amount = payment["amount"]
+        if user in totals:
+            totals[user] += amount
+        else:
+            totals[user] = amount
+    return totals
+
+# === TRIGGER ===
+result = totals_per_user(payments)
+print("Totals per user:")
+for user, total in result.items():
+    print(f"  {user}: ${total}")`,
+    js: `// === SETTINGS ===
+const payments = [
+  { user: "Jon",  amount: 200 },
+  { user: "Ana",  amount: 150 },
+  { user: "Jon",  amount: 300 },
+  { user: "Luis", amount: 500 },
+  { user: "Ana",  amount: 250 },
+  { user: "Jon",  amount: 100 },
+];
+
+// === MAIN FUNCTION ===
+function totalsPerUser(payments) {
+  return payments.reduce((acc, p) => {
+    acc[p.user] = (acc[p.user] || 0) + p.amount;
+    return acc;
+  }, {});
+}
+
+// === TRIGGER ===
+const result = totalsPerUser(payments);
+console.log("Totals:", result);`
+  },
+  {
+    title: "Process Orders & Return Summary",
+    py: `# === SETTINGS ===
+orders = [
+    {"id": 1, "item": "Laptop",  "qty": 1, "price": 999},
+    {"id": 2, "item": "Mouse",   "qty": 3, "price": 29},
+    {"id": 3, "item": "Monitor", "qty": 2, "price": 349},
+    {"id": 4, "item": "Keyboard","qty": 1, "price": 79},
+]
+
+# === HELPER ===
+def order_total(order):
+    return order["qty"] * order["price"]
+
+# === MAIN FUNCTION ===
+def process_orders(orders):
+    summary = []
+    grand_total = 0
+    for order in orders:
+        total = order_total(order)
+        grand_total += total
+        summary.append({
+            "id":    order["id"],
+            "item":  order["item"],
+            "total": total
+        })
+    return {"items": summary, "grand_total": grand_total}
+
+# === TRIGGER ===
+result = process_orders(orders)
+print("Order Summary:")
+for item in result["items"]:
+    print(f"  #{item['id']} {item['item']}: ${item['total']}")
+print(f"Grand Total: ${result['grand_total']}")`,
+    js: `// === SETTINGS ===
+const orders = [
+  { id: 1, item: "Laptop",   qty: 1, price: 999 },
+  { id: 2, item: "Mouse",    qty: 3, price: 29  },
+  { id: 3, item: "Monitor",  qty: 2, price: 349 },
+  { id: 4, item: "Keyboard", qty: 1, price: 79  },
+];
+
+// === HELPER ===
+const orderTotal = o => o.qty * o.price;
+
+// === MAIN FUNCTION ===
+function processOrders(orders) {
+  const items = orders.map(o => ({
+    id: o.id, item: o.item,
+    total: orderTotal(o)
+  }));
+  const grandTotal = items.reduce(
+    (sum, o) => sum + o.total, 0
+  );
+  return { items, grandTotal };
+}
+
+// === TRIGGER ===
+const result = processOrders(orders);
+console.log(result);`
+  },
+  {
+    title: "Debug This Code",
+    py: `# === BROKEN CODE — Find and fix the bugs ===
+# There are 3 bugs hidden in this function.
+# Read carefully, fix them, then run it.
+
+def calculate_average(numbers):
+    total = 0
+    for num in numbers:
+        total = total + num
+    average = total / len(numbers)
+    return average
+
+def find_max(numbers):
+    max_val = numbers[0]
+    for num in numbers:
+        if num > max_val:
+            max_val = num
+    return max_val
+
+# BUG 1: This list has a string inside — fix it
+scores = [85, 90, "78", 92, 88]
+
+# BUG 2: This will crash if list is empty — why?
+empty = []
+
+# BUG 3: Wrong variable name used below
+result_avg = calculate_average(scores)
+result_max = find_max(scores)
+
+print(f"Average: {result_avg}")
+print(f"Max: {result_max}")
+
+# CHALLENGE: Fix all 3 bugs and make it run clean`,
+    js: `// Same exercise in JS — 3 bugs to find
+function calculateAverage(numbers) {
+  const total = numbers.reduce(
+    (sum, n) => sum + n, 0
+  );
+  return total / numbers.length;
+}
+
+function findMax(numbers) {
+  return Math.max(...numbers);
+}
+
+// BUG 1: string in array
+const scores = [85, 90, "78", 92, 88];
+
+// BUG 2: empty array crash
+const empty = [];
+
+// BUG 3: wrong variable name
+const avg = calculateAverage(scores);
+const max = findMax(scores);
+
+console.log("Average:", avg);
+console.log("Max:", max);`
+  },
+  {
+    title: "Sandbox — Write anything",
+    py: `# === SANDBOX ===
+# This is your free practice space.
+# Write any Python here and run it.
+
+# Try it:
+name = "Jonathan"
+numbers = [1, 2, 3, 4, 5]
+
+for n in numbers:
+    print(f"Hello {name}, number is {n}")`,
+    js: `// Free sandbox — JS equivalent
+const name = "Jonathan";
+const numbers = [1, 2, 3, 4, 5];
+
+numbers.forEach(n => {
+  console.log(\`Hello \${name}, number is \${n}\`);
+});`
+  }
+];
+
+let currentEx = 0;
+
+function loadEx(index) {
+  currentEx = index;
+  document.querySelectorAll('.ex-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === index);
+  });
+  document.getElementById('pyEditor').value = exercises[index].py;
+  document.getElementById('jsEditor').value = exercises[index].js;
+  clearOutput();
+}
+
+function clearOutput() {
+  document.getElementById('output').innerHTML = '<span class="info">Output will appear here when you run your code...</span>';
+}
+
+function appendOutput(text, type) {
+  const out = document.getElementById('output');
+  if (out.querySelector('.info')) out.innerHTML = '';
+  const span = document.createElement('span');
+  span.className = type;
+  span.textContent = text + '\n';
+  out.appendChild(span);
+  out.scrollTop = out.scrollHeight;
+}
+
+async function runCode() {
+  if (!pyodide) return;
+  const code = document.getElementById('pyEditor').value;
+  const out = document.getElementById('output');
+  out.innerHTML = '';
+
+  pyodide.setStdout({ batched: (text) => appendOutput(text, 'result') });
+  pyodide.setStderr({ batched: (text) => appendOutput(text, 'error') });
+
+  try {
+    await pyodide.runPythonAsync(code);
+    appendOutput('✓ Done', 'success');
+  } catch (err) {
+    appendOutput('✗ ' + err.message, 'error');
+  }
+}
+
+async function initPyodide() {
+  try {
+    pyodide = await loadPyodide();
+    document.getElementById('status').textContent = '✓ Python ready';
+    document.getElementById('status').className = 'status ready';
+    document.getElementById('runBtn').disabled = false;
+  } catch (e) {
+    document.getElementById('status').textContent = '✗ Failed to load Python';
+    document.getElementById('status').className = 'status';
+  }
+}
+
+document.getElementById('pyEditor').addEventListener('keydown', function(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+    this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+    this.selectionStart = this.selectionEnd = start + 4;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    runCode();
+  }
+});
+
+loadEx(0);
+initPyodide();
+</script>
+</body>
+</html>
