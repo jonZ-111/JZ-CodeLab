@@ -2,25 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>©️coding playground🧑‍💻</title>
+    <title>©️Flag Transactions🧑‍💻</title>
 </head>
 <body>
 
-    <h1>playground field ♉</h1>
+    <h1>Flag Suspicious Transactions</h1>
+    <h3>Flagged Transactions, due to Suspicious activity</h3>
     <div id="output"></div>
 
     <script>
     // === SETTINGS ===
+    const transactions = [
+        { user: "Jon",  amount: 500  },
+        { user: "Jon",  amount: 3500 },
+        { user: "Jon",  amount: 200  },
+        { user: "Jon",  amount: 100  },
+        { user: "Ana",  amount: 5000 },
+        { user: "Luis", amount: 800  },
+    ];
 
     // === HELPER ===
+    const timesRepeated = (user, tra) =>
+        tra.filter(t => t.user === user).length;
+
+    const amountOfTransaction = (tra) =>
+        tra.amount;
 
     // === CORE LOGIC ===
+    function isFlagged(transactions) {
+        let flagged = [];
+        for (let tra of transactions) {
+            if (amountOfTransaction(tra) > 3000 || 
+                timesRepeated(tra.user, transactions) > 3) {
+                flagged.push(tra);
+            }
+        }
+        return flagged;
+    }
 
     // === TRIGGER ===
-    
-    // === RENDER TO PAGE ===
         //null must be replaced with the function call.
-        const result = null; 
+      const result = isFlagged(transactions); 
+
+    // === RENDER TO PAGE ===
         const output = document.getElementById("output");
 
         if(Array.isArray(result)) {
@@ -31,7 +55,7 @@
         } else {
             output.innerHTML = `<p>${JSON.stringify(result)}</p>` 
         }
-                
+    
     </script>
 
 </body>
